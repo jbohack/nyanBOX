@@ -5,6 +5,7 @@
 
 #include <EEPROM.h>
 #include <U8g2lib.h>
+#include <level_calculations.h>
 #include "../include/level_system.h" 
 #include "../include/sleep_manager.h"
 #include "../include/pindefs.h"
@@ -20,11 +21,6 @@ static int currentXP = 0;
 static bool buttonCenterPressed = false;
 
 void saveLevelData();
-
-int getXPRequiredForLevel(int level) {
-  if (level <= 1) return 0;
-  return (level * level) + 10;
-}
 
 void loadLevelData() {
   uint8_t magic = EEPROM.read(EEPROM_ADDRESS_LEVEL_MAGIC);
@@ -58,21 +54,12 @@ void levelSystemSetup() {
 }
 
 void addXP(int amount) {
-  if (currentXP + amount > 65535) {
-    currentXP = 65535;
-  } else {
-    currentXP += amount;
-  }
-  
+  currentXP = calculateNewXP(currentXP, amount);
   saveLevelData();
 }
 
 int getCurrentLevel() {
-  int level = 1;
-  while (level < 99 && currentXP >= getXPRequiredForLevel(level + 1)) {
-    level++;
-  }
-  return level;
+  return calculateCurrentLevelFromXP(currentXP);
 }
 
 int getCurrentXP() {
@@ -80,27 +67,15 @@ int getCurrentXP() {
 }
 
 int getXPForNextLevel() {
-  int currentLevel = getCurrentLevel();
+  int currentLevel = calculateCurrentLevelFromXP(currentXP);
   if (currentLevel >= 99) return 0;
-  return getXPRequiredForLevel(currentLevel + 1);
-}
-
-const char* getRankName(int level) {
-  if (level <= 5) return "N00b";
-  else if (level <= 15) return "Skid";
-  else if (level <= 25) return "Wannabe";
-  else if (level <= 40) return "L33t";
-  else if (level <= 55) return "Hacker";
-  else if (level <= 70) return "Uber Hacker";
-  else if (level <= 85) return "Elite";
-  else if (level <= 95) return "Godlike";
-  else return "Legend";
+  return calculateXPRequiredForLevel(currentLevel + 1);
 }
 
 void displayLevelScreen() {
   u8g2.clearBuffer();
   
-  int currentLevel = getCurrentLevel();
+  int currentLevel = calculateCurrentLevelFromXP(currentXP);
   
   u8g2.setFont(u8g2_font_helvB14_tr);
   char levelStr[8];
@@ -108,7 +83,7 @@ void displayLevelScreen() {
   int levelWidth = u8g2.getUTF8Width(levelStr);
   u8g2.drawStr((128 - levelWidth) / 2, 18, levelStr);
   
-  const char* rankName = getRankName(currentLevel);
+  const char* rankName = calculateRankName(currentLevel);
   u8g2.setFont(u8g2_font_helvR08_tr);
   int rankWidth = u8g2.getUTF8Width(rankName);
   u8g2.drawStr((128 - rankWidth) / 2, 32, rankName);
@@ -131,7 +106,7 @@ void displayLevelScreen() {
   int fillWidth = 0;
   if (currentLevel < 99) {
     int nextLevelXP = getXPForNextLevel();
-    int currentLevelXP = getXPRequiredForLevel(currentLevel);
+    int currentLevelXP = calculateXPRequiredForLevel(currentLevel);
     if (nextLevelXP > currentLevelXP) {
       int progress = map(currentXP - currentLevelXP, 0, nextLevelXP - currentLevelXP, 0, 100);
       fillWidth = map(progress, 0, 100, 0, barWidth - 2);
