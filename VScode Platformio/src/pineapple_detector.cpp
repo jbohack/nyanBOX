@@ -1,8 +1,12 @@
 /*
-   ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/pineapple_detector.h"
@@ -546,10 +550,17 @@ void pineappleDetectorLoop() {
         char buf[32];
 
         const char* displaySSID = (dev.ssid[0] == '\0') ? "Hidden" : dev.ssid;
+        char maskedSSID[33];
+        if (dev.ssid[0] != '\0') {
+            maskName(dev.ssid, maskedSSID, sizeof(maskedSSID) - 1);
+            displaySSID = maskedSSID;
+        }
         snprintf(buf, sizeof(buf), "%.13s Ch:%d", displaySSID, locateTargetChannel);
         u8g2.drawStr(0, 8, buf);
 
-        snprintf(buf, sizeof(buf), "%s", dev.bssid);
+        char maskedBSSID[18];
+        maskMAC(dev.bssid, maskedBSSID);
+        snprintf(buf, sizeof(buf), "%s", maskedBSSID);
         u8g2.drawStr(0, 16, buf);
 
         u8g2.setFont(u8g2_font_7x13B_tr);
@@ -596,10 +607,17 @@ void pineappleDetectorLoop() {
         char buf[40];
 
         const char* displaySSID = (dev.ssid[0] == '\0') ? "Hidden" : dev.ssid;
+        char maskedSSID[33];
+        if (dev.ssid[0] != '\0') {
+            maskName(dev.ssid, maskedSSID, sizeof(maskedSSID) - 1);
+            displaySSID = maskedSSID;
+        }
         snprintf(buf, sizeof(buf), "SSID: %s", displaySSID);
         u8g2.drawStr(0, 10, buf);
 
-        snprintf(buf, sizeof(buf), "BSSID: %s", dev.bssid);
+        char maskedBSSID[18];
+        maskMAC(dev.bssid, maskedBSSID);
+        snprintf(buf, sizeof(buf), "BSSID: %s", maskedBSSID);
         u8g2.drawStr(0, 20, buf);
 
         snprintf(buf, sizeof(buf), "RSSI: %d dBm", dev.rssi);
@@ -628,6 +646,11 @@ void pineappleDetectorLoop() {
                 u8g2.drawStr(0, 20 + i * 10, ">");
             char line[32];
             const char* displaySSID = (d.ssid[0] == '\0') ? "Hidden" : d.ssid;
+            char maskedSSID[33];
+            if (d.ssid[0] != '\0') {
+                maskName(d.ssid, maskedSSID, sizeof(maskedSSID) - 1);
+                displaySSID = maskedSSID;
+            }
             snprintf(line, sizeof(line), "%.8s | RSSI %d",
                      displaySSID, d.rssi);
             u8g2.drawStr(10, 20 + i * 10, line);

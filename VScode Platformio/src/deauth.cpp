@@ -1,13 +1,19 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/deauth.h"
 #include "../include/sleep_manager.h"
 #include "../include/pindefs.h"
 #include "../include/display_mirror.h"
+#include "../include/setting.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 
@@ -256,15 +262,20 @@ void drawList() {
     u8g2.drawStr(0, 12, "Select AP to deauth");
     if (apCount > 0) {
         char line1[32];
-        snprintf(line1, sizeof(line1), "%s  Ch:%d", apList[apIndex].ssid,
+        char maskedSSID[33];
+        maskName(apList[apIndex].ssid, maskedSSID, sizeof(maskedSSID) - 1);
+        snprintf(line1, sizeof(line1), "%s  Ch:%d", maskedSSID,
                  apList[apIndex].channel);
         u8g2.drawStr(0, 28, line1);
         char line2[24];
-        snprintf(line2, sizeof(line2), "%02X:%02X:%02X:%02X:%02X:%02X",
+        char bssidStr[18];
+        snprintf(bssidStr, sizeof(bssidStr), "%02X:%02X:%02X:%02X:%02X:%02X",
                  apList[apIndex].bssid[0], apList[apIndex].bssid[1],
                  apList[apIndex].bssid[2], apList[apIndex].bssid[3],
                  apList[apIndex].bssid[4], apList[apIndex].bssid[5]);
-        u8g2.drawStr(0, 44, line2);
+        char maskedBSSID[18];
+        maskMAC(bssidStr, maskedBSSID);
+        u8g2.drawStr(0, 44, maskedBSSID);
     } else {
         u8g2.drawStr(0, 30, "No APs found");
     }
@@ -279,7 +290,9 @@ void drawDeauthSingle() {
     u8g2.setFont(u8g2_font_6x10_tr);
     u8g2.drawStr(0, 12, "Deauthing Selected AP");
     char buf[32];
-    snprintf(buf, sizeof(buf), "%s  Ch:%d", apList[apIndex].ssid,
+    char maskedSSID[33];
+    maskName(apList[apIndex].ssid, maskedSSID, sizeof(maskedSSID) - 1);
+    snprintf(buf, sizeof(buf), "%s  Ch:%d", maskedSSID,
              apList[apIndex].channel);
     u8g2.drawStr(0, 28, buf);
     char mac[24];
@@ -287,7 +300,9 @@ void drawDeauthSingle() {
              apList[apIndex].bssid[0], apList[apIndex].bssid[1],
              apList[apIndex].bssid[2], apList[apIndex].bssid[3],
              apList[apIndex].bssid[4], apList[apIndex].bssid[5]);
-    u8g2.drawStr(0, 44, mac);
+    char maskedMAC[18];
+    maskMAC(mac, maskedMAC);
+    u8g2.drawStr(0, 44, maskedMAC);
     u8g2.setFont(u8g2_font_5x8_tr);
     u8g2.drawStr(0, 62, "L=Stop & Back SEL=Exit");
     u8g2.sendBuffer();

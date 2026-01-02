@@ -1,7 +1,13 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -24,6 +30,7 @@
 #include "../include/scanner.h"
 #include "../include/analyzer.h"
 #include "../include/sourapple.h"
+#include "../include/sourdroid.h"
 #include "../include/blescan.h"
 #include "../include/ble_spammer.h"
 #include "../include/ble_spoofer.h"
@@ -51,6 +58,7 @@
 #include "../include/legal_disclaimer.h"
 #include "../include/cardskimmer_detector.h"
 #include "../include/axon_detector.h"
+#include "../include/drone_detector.h"
 #include "../include/flock_detector.h"
 #include "../include/pineapple_detector.h"
 #include "../include/display_mirror.h"
@@ -217,6 +225,7 @@ bool isOffensiveApp(const char* appName) {
          strstr(appName, "Spam") != nullptr ||
          strstr(appName, "Swift Pair") != nullptr ||
          strstr(appName, "Sour Apple") != nullptr ||
+         strstr(appName, "Sour Droid") != nullptr ||
          strstr(appName, "Spoofer") != nullptr ||
          strstr(appName, "Evil Portal") != nullptr;
 }
@@ -415,7 +424,7 @@ MenuItem mainMenu[] = {
 constexpr int MAIN_MENU_SIZE = sizeof(mainMenu) / sizeof(mainMenu[0]);
 
 MenuItem wifiMenu[] = {
-  { "WiFi Scan",       nullptr, wifiscanSetup,           wifiscanLoop,           cleanupWiFi },
+  { "WiFi Scan",       nullptr, wifiscanSetup,           wifiscanLoop,           wifiscanCleanup },
   { "Channel Analyzer", nullptr, channelAnalyzerSetup,   channelAnalyzerLoop,    cleanupWiFi },
   { "WiFi Deauther",   nullptr, deauthSetup,             deauthLoop,             cleanupWiFi },
   { "Deauth Scanner",  nullptr, deauthScannerSetup,      deauthScannerLoop,      cleanupWiFi },
@@ -442,6 +451,7 @@ MenuItem bleMenu[] = {
   { "BLE Spammer",  nullptr, bleSpamSetup,             bleSpamLoop,             cleanupBLE },
   { "Swift Pair",   nullptr, swiftpairSpamSetup,       swiftpairSpamLoop,       cleanupBLE },
   { "Sour Apple",   nullptr, sourappleSetup,           sourappleLoop,           cleanupBLE },
+  { "Sour Droid",    nullptr, sourDroidSetup,          sourDroidLoop,          cleanupBLE },
   { "BLE Spoofer",  nullptr, bleSpooferSetup,          bleSpooferLoop,          cleanupBLE },
   { "Back",         nullptr, nullptr,                  nullptr,                 noCleanup }
 };
@@ -449,6 +459,7 @@ constexpr int BLE_MENU_SIZE = sizeof(bleMenu) / sizeof(bleMenu[0]);
 
 MenuItem otherMenu[] = {
   { "SigKill",   nullptr, sigkillSetup,   sigkillLoop,   cleanupRadio },
+  { "Drone Detector", nullptr, droneDetectorSetup, droneDetectorLoop, cleanupDroneDetector },
   { "Flock Detector", nullptr, flockDetectorSetup, flockDetectorLoop, cleanupFlockDetector },
   { "Scanner",      nullptr, scannerSetup,    scannerLoop,    cleanupRadio },
   { "Analyzer",     nullptr, analyzerSetup,   analyzerLoop,   cleanupRadio },
@@ -555,14 +566,29 @@ void setup() {
   Serial.begin(115200);
 
   neopixelSetup();
-  for (auto &r : radios) {
-    r.begin();
-    r.setAutoAck(false);
-    r.stopListening();
-    r.setRetries(0,0);
-    r.setPALevel(RF24_PA_MAX, true);
-    r.setDataRate(RF24_2MBPS);
-    r.setCRCLength(RF24_CRC_DISABLED);
+  SPI.begin();
+
+  int cePins[] = {RADIO_CE_PIN_1, RADIO_CE_PIN_2, RADIO_CE_PIN_3};
+  int csnPins[] = {RADIO_CSN_PIN_1, RADIO_CSN_PIN_2, RADIO_CSN_PIN_3};
+
+  for (int i = 0; i < 3; i++) {
+    pinMode(cePins[i], OUTPUT);
+    pinMode(csnPins[i], OUTPUT);
+    digitalWrite(csnPins[i], HIGH);
+    digitalWrite(cePins[i], LOW);
+  }
+  delay(100);
+
+  for (int i = 0; i < 3; i++) {
+    if (!radios[i].begin() || !radios[i].isChipConnected()) {
+      while(true) { delay(1000); }
+    }
+    radios[i].setAutoAck(false);
+    radios[i].stopListening();
+    radios[i].setRetries(0,0);
+    radios[i].setPALevel(RF24_PA_MAX, true);
+    radios[i].setDataRate(RF24_2MBPS);
+    radios[i].setCRCLength(RF24_CRC_DISABLED);
   }
 
   EEPROM.begin(512);
@@ -571,6 +597,20 @@ void setup() {
   dangerousActionsEnabled = false;
 
   loadSleepTimeoutFromEEPROM();
+
+  uint8_t continuousScanValue = EEPROM.read(4);
+  if (continuousScanValue == 0xFF) {
+    continuousScanEnabled = true;
+  } else {
+    continuousScanEnabled = (continuousScanValue == 1);
+  }
+
+  uint8_t privacyModeValue = EEPROM.read(5);
+  if (privacyModeValue == 0xFF) {
+    privacyModeEnabled = false;
+  } else {
+    privacyModeEnabled = (privacyModeValue == 1);
+  }
 
   u8g2.begin();
   u8g2.setContrast(oledBrightness);

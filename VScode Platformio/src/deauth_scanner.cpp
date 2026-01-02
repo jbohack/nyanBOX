@@ -1,13 +1,19 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/deauth_scanner.h"
 #include "../include/sleep_manager.h"
 #include "../include/pindefs.h"
 #include "../include/display_mirror.h"
+#include "../include/setting.h"
 #include <U8g2lib.h>
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -164,9 +170,11 @@ void renderDeauthStats() {
         const char* macLabel = "Last MAC:";
         int macLabelWidth = u8g2.getUTF8Width(macLabel);
         u8g2.drawStr((128 - macLabelWidth) / 2, 46, macLabel);
-        
+
+        char maskedMAC[18];
+        maskMAC(macStr, maskedMAC);
         char macChanStr[24];
-        snprintf(macChanStr, sizeof(macChanStr), "%s CH%d", macStr, lastDeauthChannel);
+        snprintf(macChanStr, sizeof(macChanStr), "%s CH%d", maskedMAC, lastDeauthChannel);
         int macChanWidth = u8g2.getUTF8Width(macChanStr);
         u8g2.drawStr((128 - macChanWidth) / 2, 54, macChanStr);
     } else {

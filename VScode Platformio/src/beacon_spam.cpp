@@ -1,12 +1,18 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/beacon_spam.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
+#include "../include/setting.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include <string.h>
@@ -201,8 +207,10 @@ void drawSSIDList() {
     u8g2.drawStr(0, 12, "Select SSID to clone");
     if (!scannedSSIDs.empty()) {
         int idx = ssidIndex;
+        char maskedSSID[33];
+        maskName(scannedSSIDs[idx].ssid, maskedSSID, sizeof(maskedSSID) - 1);
         char line1[32];
-        snprintf(line1, sizeof(line1), "%s  Ch:%d", scannedSSIDs[idx].ssid, scannedSSIDs[idx].channel);
+        snprintf(line1, sizeof(line1), "%s  Ch:%d", maskedSSID, scannedSSIDs[idx].channel);
         u8g2.drawStr(0, 28, line1);
         u8g2.drawStr(0, 44, scannedSSIDs[idx].selected ? "[*] Selected" : "[ ] Not selected");
     } else {

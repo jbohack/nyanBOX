@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+#
+# nyanBOX by Nyan Devices
+# https://github.com/jbohack/nyanBOX
+# Copyright (c) 2025 jbohack
+#
+# Licensed under the MIT License
+# https://opensource.org/licenses/MIT
+#
+# SPDX-License-Identifier: MIT
+#
+
 """
 nyanBOX Display Mirror Viewer
 Cross-platform OLED framebuffer viewer with auto-connection and mirroring.

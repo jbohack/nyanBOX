@@ -1,4 +1,15 @@
 #!/bin/bash
+#
+# nyanBOX by Nyan Devices
+# https://github.com/jbohack/nyanBOX
+# Copyright (c) 2025 jbohack
+#
+# Licensed under the MIT License
+# https://opensource.org/licenses/MIT
+#
+# SPDX-License-Identifier: MIT
+#
+
 set -e
 
 PLATFORMIO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

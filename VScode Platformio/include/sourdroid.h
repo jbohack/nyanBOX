@@ -9,10 +9,10 @@
     SPDX-License-Identifier: MIT
 */
 
-#ifndef SWIFTPAIR_SPAM_H
-#define SWIFTPAIR_SPAM_H
+#ifndef SOURDROID_H
+#define SOURDROID_H
 
-void swiftpairSpamSetup();
-void swiftpairSpamLoop();
+void sourDroidSetup();
+void sourDroidLoop();
 
 #endif

@@ -9,10 +9,11 @@
     SPDX-License-Identifier: MIT
 */
 
-#ifndef SWIFTPAIR_SPAM_H
-#define SWIFTPAIR_SPAM_H
+#ifndef DRONE_DETECTOR_H
+#define DRONE_DETECTOR_H
 
-void swiftpairSpamSetup();
-void swiftpairSpamLoop();
+void droneDetectorSetup();
+void droneDetectorLoop();
+void cleanupDroneDetector();
 
 #endif

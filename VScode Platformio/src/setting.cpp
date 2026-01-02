@@ -1,7 +1,13 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include <EEPROM.h>
 #include <U8g2lib.h>
@@ -20,13 +26,15 @@ extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 #define EEPROM_ADDRESS_BRIGHTNESS 1
 #define EEPROM_ADDRESS_SLEEP_TIMEOUT 3
 #define EEPROM_ADDRESS_CONTINUOUS_SCAN 4
+#define EEPROM_ADDRESS_PRIVACY_MODE 5
 
 int currentSetting = 0;
-int totalSettings = 6;
+int totalSettings = 7;
 bool neoPixelActive = true;
 uint8_t oledBrightness = 100;
 extern bool dangerousActionsEnabled;
 bool continuousScanEnabled = true;
+bool privacyModeEnabled = false;
 bool showResetConfirm = false;
 uint8_t sleepTimeoutIndex = 3;
 
@@ -36,6 +44,7 @@ static bool lastNeoPixelActive = true;
 static uint8_t lastOledBrightness = 100;
 static bool lastDangerousActionsEnabled = false;
 static bool lastContinuousScanEnabled = true;
+static bool lastPrivacyModeEnabled = false;
 static bool lastShowResetConfirm = false;
 static uint8_t lastSleepTimeoutIndex = 3;
 
@@ -62,6 +71,7 @@ void settingSetup() {
   uint8_t brightnessValue = EEPROM.read(EEPROM_ADDRESS_BRIGHTNESS);
   uint8_t sleepTimeoutValue = EEPROM.read(EEPROM_ADDRESS_SLEEP_TIMEOUT);
   uint8_t continuousScanValue = EEPROM.read(EEPROM_ADDRESS_CONTINUOUS_SCAN);
+  uint8_t privacyModeValue = EEPROM.read(EEPROM_ADDRESS_PRIVACY_MODE);
 
   if (neoPixelValue == 0xFF) {
     neoPixelActive = true;
@@ -93,6 +103,14 @@ void settingSetup() {
     continuousScanEnabled = (continuousScanValue == 1);
   }
 
+  if (privacyModeValue == 0xFF) {
+    privacyModeEnabled = false;
+    EEPROM.write(EEPROM_ADDRESS_PRIVACY_MODE, 0);
+    EEPROM.commit();
+  } else {
+    privacyModeEnabled = (privacyModeValue == 1);
+  }
+
   u8g2.setContrast(oledBrightness);
 
   updateSleepTimeout(sleepTimeouts[sleepTimeoutIndex] * 1000);
@@ -106,6 +124,7 @@ void settingSetup() {
   lastOledBrightness = oledBrightness;
   lastDangerousActionsEnabled = dangerousActionsEnabled;
   lastContinuousScanEnabled = continuousScanEnabled;
+  lastPrivacyModeEnabled = privacyModeEnabled;
   lastShowResetConfirm = false;
   lastSleepTimeoutIndex = sleepTimeoutIndex;
 }
@@ -207,6 +226,13 @@ void settingLoop() {
             break;
 
           case 5:
+            privacyModeEnabled = !privacyModeEnabled;
+            EEPROM.write(EEPROM_ADDRESS_PRIVACY_MODE, privacyModeEnabled ? 1 : 0);
+            EEPROM.commit();
+            needsRedraw = true;
+            break;
+
+          case 6:
             showResetConfirm = true;
             needsRedraw = true;
             break;
@@ -256,6 +282,10 @@ void settingLoop() {
   }
   if (lastContinuousScanEnabled != continuousScanEnabled) {
     lastContinuousScanEnabled = continuousScanEnabled;
+    needsRedraw = true;
+  }
+  if (lastPrivacyModeEnabled != privacyModeEnabled) {
+    lastPrivacyModeEnabled = privacyModeEnabled;
     needsRedraw = true;
   }
 
@@ -316,6 +346,10 @@ void settingLoop() {
           u8g2.drawStr(85, yPos, continuousScanEnabled ? "On" : "Off");
           break;
         case 5:
+          u8g2.drawStr(10, yPos, "Privacy:");
+          u8g2.drawStr(85, yPos, privacyModeEnabled ? "On" : "Off");
+          break;
+        case 6:
           u8g2.drawStr(10, yPos, "Reset XP:");
           char lvlStr[8];
           sprintf(lvlStr, "Lv%d", getCurrentLevel());
@@ -336,4 +370,46 @@ bool isDangerousActionsEnabled() {
 
 bool isContinuousScanEnabled() {
   return continuousScanEnabled;
+}
+
+bool isPrivacyModeEnabled() {
+  return privacyModeEnabled;
+}
+
+void maskMAC(const char* original, char* masked) {
+  if (!privacyModeEnabled || original == nullptr || masked == nullptr) {
+    if (original && masked) {
+      strcpy(masked, original);
+    }
+    return;
+  }
+
+  strncpy(masked, original, 8);
+  masked[8] = '\0';
+
+  strcat(masked, ":**:**:**");
+}
+
+void maskName(const char* original, char* masked, int maxLen) {
+  if (!privacyModeEnabled || original == nullptr || masked == nullptr) {
+    if (original && masked) {
+      strncpy(masked, original, maxLen);
+      masked[maxLen] = '\0';
+    }
+    return;
+  }
+
+  int len = strlen(original);
+  if (len == 0) {
+    masked[0] = '\0';
+    return;
+  }
+
+  masked[0] = original[0];
+
+  int asterisks = min(len - 1, maxLen - 1);
+  for (int i = 1; i <= asterisks; i++) {
+    masked[i] = '*';
+  }
+  masked[asterisks + 1] = '\0';
 }

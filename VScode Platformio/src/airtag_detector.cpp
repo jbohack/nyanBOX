@@ -1,8 +1,12 @@
 /*
-   ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
 */
 
 #include "../include/airtag_detector.h"
@@ -468,10 +472,14 @@ void airtagDetectorLoop() {
         u8g2.setFont(u8g2_font_5x8_tr);
         char buf[32];
 
-        snprintf(buf, sizeof(buf), "%.16s", dev.name);
+        char maskedName[33];
+        maskName(dev.name, maskedName, sizeof(maskedName) - 1);
+        snprintf(buf, sizeof(buf), "%.16s", maskedName);
         u8g2.drawStr(0, 8, buf);
 
-        snprintf(buf, sizeof(buf), "%s", dev.address);
+        char maskedAddress[18];
+        maskMAC(dev.address, maskedAddress);
+        snprintf(buf, sizeof(buf), "%s", maskedAddress);
         u8g2.drawStr(0, 16, buf);
 
         u8g2.setFont(u8g2_font_7x13B_tr);
@@ -516,11 +524,15 @@ void airtagDetectorLoop() {
         auto &dev = airtagDevices[currentIndex];
         u8g2.setFont(u8g2_font_5x8_tr);
         char buf[32];
-        
-        snprintf(buf, sizeof(buf), "Name: %s", dev.name);
+
+        char maskedName[33];
+        maskName(dev.name, maskedName, sizeof(maskedName) - 1);
+        snprintf(buf, sizeof(buf), "Name: %s", maskedName);
         u8g2.drawStr(0, 10, buf);
-        
-        snprintf(buf, sizeof(buf), "Addr: %s", dev.address);
+
+        char maskedAddress[18];
+        maskMAC(dev.address, maskedAddress);
+        snprintf(buf, sizeof(buf), "Addr: %s", maskedAddress);
         u8g2.drawStr(0, 20, buf);
         
         snprintf(buf, sizeof(buf), "RSSI: %d dBm", dev.rssi);
@@ -544,13 +556,15 @@ void airtagDetectorLoop() {
             int idx = listStartIndex + i;
             if (idx >= (int)airtagDevices.size())
                 break;
-            
+
             auto &d = airtagDevices[idx];
             if (idx == currentIndex)
                 u8g2.drawStr(0, 20 + i * 10, ">");
-            
+
             char line[32];
-            snprintf(line, sizeof(line), "%.8s | RSSI %d", d.name, d.rssi);
+            char maskedName[33];
+            maskName(d.name, maskedName, sizeof(maskedName) - 1);
+            snprintf(line, sizeof(line), "%.8s | RSSI %d", maskedName, d.rssi);
             u8g2.drawStr(10, 20 + i * 10, line);
         }
     }

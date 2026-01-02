@@ -1,12 +1,19 @@
-/* ____________________________
-   This software is licensed under the MIT License:
-   https://github.com/jbohack/nyanBOX
-   ________________________________________ */
+/*
+    nyanBOX by Nyan Devices
+    https://github.com/jbohack/nyanBOX
+    Copyright (c) 2025 jbohack
+
+    Licensed under the MIT License
+    https://opensource.org/licenses/MIT
+
+    SPDX-License-Identifier: MIT
+*/
 
 #include "../include/evil_portal.h"
 #include "../include/sleep_manager.h"
 #include "../include/display_mirror.h"
 #include "../include/pindefs.h"
+#include "../include/setting.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_netif.h"
@@ -461,13 +468,15 @@ void drawPortalMenu() {
             snprintf(itemStr, sizeof(itemStr), "%s %s",
                     selected ? ">" : " ", templateNames[currentTemplate]);
         } else if (i == 2) {
+            char maskedSSID[33];
+            maskName(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1);
             char truncatedSSID[16];
-            if (currentSSID.length() > 12) {
-                strncpy(truncatedSSID, currentSSID.c_str(), 12);
+            if (strlen(maskedSSID) > 12) {
+                strncpy(truncatedSSID, maskedSSID, 12);
                 truncatedSSID[12] = '\0';
                 strcat(truncatedSSID, "..");
             } else {
-                strcpy(truncatedSSID, currentSSID.c_str());
+                strcpy(truncatedSSID, maskedSSID);
             }
             snprintf(itemStr, sizeof(itemStr), "%s SSID: %s",
                     selected ? ">" : " ", truncatedSSID);
@@ -493,13 +502,15 @@ void drawPortalStatus() {
     u8g2.clearBuffer();
     u8g2.setFont(u8g2_font_5x8_tr);
     u8g2.drawStr(0, 10, "Portal Running");
+    char maskedSSID[33];
+    maskName(currentSSID.c_str(), maskedSSID, sizeof(maskedSSID) - 1);
     char ssidStr[22];
-    if (currentSSID.length() > 18) {
-        strncpy(ssidStr, currentSSID.c_str(), 16);
+    if (strlen(maskedSSID) > 18) {
+        strncpy(ssidStr, maskedSSID, 16);
         ssidStr[16] = '\0';
         strcat(ssidStr, "..");
     } else {
-        strcpy(ssidStr, currentSSID.c_str());
+        strcpy(ssidStr, maskedSSID);
     }
     u8g2.drawStr(0, 22, ssidStr);
     char templateStr[22];
@@ -534,23 +545,27 @@ void drawCredentialsList() {
     } else {
         const Credential& cred = capturedCreds[credIndex];
 
+        char maskedSSIDFull[33];
+        maskName(cred.ssid.c_str(), maskedSSIDFull, sizeof(maskedSSIDFull) - 1);
         char ssidStr[22];
-        if (cred.ssid.length() > 20) {
-            strncpy(ssidStr, cred.ssid.c_str(), 18);
+        if (strlen(maskedSSIDFull) > 20) {
+            strncpy(ssidStr, maskedSSIDFull, 18);
             ssidStr[18] = '\0';
             strcat(ssidStr, "..");
         } else {
-            strcpy(ssidStr, cred.ssid.c_str());
+            strcpy(ssidStr, maskedSSIDFull);
         }
         u8g2.drawStr(0, 10, "Net:");
         u8g2.drawStr(25, 10, ssidStr);
 
+        char maskedMACFull[18];
+        maskMAC(cred.macAddress.c_str(), maskedMACFull);
         char macStr[18];
-        if (cred.macAddress.length() > 17) {
-            strncpy(macStr, cred.macAddress.c_str(), 17);
+        if (strlen(maskedMACFull) > 17) {
+            strncpy(macStr, maskedMACFull, 17);
             macStr[17] = '\0';
         } else {
-            strcpy(macStr, cred.macAddress.c_str());
+            strcpy(macStr, maskedMACFull);
         }
         u8g2.drawStr(0, 20, "MAC:");
         u8g2.drawStr(25, 20, macStr);
