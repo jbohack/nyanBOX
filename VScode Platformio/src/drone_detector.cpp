@@ -1034,12 +1034,12 @@ static void drawDetail() {
         u8g2.drawStr(0, 20, buf);
 
         snprintf(buf, sizeof(buf), "Msgs:%c%c%c%c%c%c",
-                 (drone.messagesSeen & (1<<0)) ? 'B' : '-', // Basic ID.
-                 (drone.messagesSeen & (1<<1)) ? 'L' : '-', // Location.
-                 (drone.messagesSeen & (1<<2)) ? 'A' : '-', // Area.
-                 (drone.messagesSeen & (1<<3)) ? 'S' : '-', // Self ID.
-                 (drone.messagesSeen & (1<<4)) ? 'Y' : '-', // System.
-                 (drone.messagesSeen & (1<<5)) ? 'O' : '-'); // Operator ID.
+                 (drone.messagesSeen & (1<<0)) ? 'B' : '-', // Basic ID
+                 (drone.messagesSeen & (1<<1)) ? 'L' : '-', // Location
+                 (drone.messagesSeen & (1<<2)) ? 'A' : '-', // Area
+                 (drone.messagesSeen & (1<<3)) ? 'S' : '-', // Self ID
+                 (drone.messagesSeen & (1<<4)) ? 'Y' : '-', // System
+                 (drone.messagesSeen & (1<<5)) ? 'O' : '-'); // Operator ID
         u8g2.drawStr(0, 30, buf);
 
     } else if (detailPage == 3) {

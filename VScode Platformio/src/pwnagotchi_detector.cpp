@@ -66,19 +66,19 @@ void IRAM_ATTR pwnagotchiSnifferCallback(void *buf, wifi_promiscuous_pkt_type_t 
   const uint8_t *pl = pkt->payload;
   int len = pkt->rx_ctrl.sig_len;
   if (len <= 4)
-    return; // Too short.
-  len -= 4; // Strip the FCS.
+    return; // Too short
+  len -= 4; // Strip the FCS
   if (len < 38 || pl[0] != 0x80)
-    return; // Not a beacon.
+    return; // Not a beacon
 
-  // Filter using the Pwnagotchi MAC (Addr #2 at offset 10).
+  // Filter using the Pwnagotchi MAC (Addr #2 at offset 10)
   char addr[18];
   snprintf(addr, sizeof(addr), "%02x:%02x:%02x:%02x:%02x:%02x", pl[10], pl[11],
            pl[12], pl[13], pl[14], pl[15]);
   if (String(addr) != "de:ad:be:ef:de:ad")
     return;
 
-  // Extract the SSID IE (offset 38, length = len - 37).
+  // Extract the SSID IE (offset 38, length = len - 37)
   int ssidLen = len - 37;
   if (ssidLen <= 0)
     return;
@@ -91,7 +91,7 @@ void IRAM_ATTR pwnagotchiSnifferCallback(void *buf, wifi_promiscuous_pkt_type_t 
     essid.concat(c);
   }
 
-  JsonDocument doc; // Adjusts automatically on ArduinoJson v7 (if changed to v6, use 1024).
+  JsonDocument doc; // Adjusts automatically on ArduinoJson v7 (if changed to v6, use 1024)
   if (deserializeJson(doc, essid))
     return;
 

@@ -24,7 +24,7 @@ extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 #define BTN_RIGHT BUTTON_PIN_RIGHT
 #define BTN_BACK BUTTON_PIN_LEFT
 
-// Function to bypass frame validation (required for raw 802.11 frames).
+// Function to bypass frame validation (required for raw 802.11 frames)
 extern "C" int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3) {
     (void)arg;
     (void)arg2;
@@ -59,7 +59,7 @@ static uint16_t lastScanCount = 0;
 static unsigned long lastScanUpdate = 0;
 const unsigned long scanUpdateInterval = 100;
 
-// Modified to whitelist network SSIDs.
+// Modified to whitelist network SSIDs
 const char *ssidWhitelist[] = {
     "whitelistExample1", 
     "whitelistExample2"
@@ -147,10 +147,10 @@ void processScanResults() {
             if (err == ESP_OK) {
                 apCount = 0;
                 for (int i = 0; i < actual_number && apCount < MAX_APS; i++) {
-                    // Skip hidden networks.
+                    // Skip hidden networks
                     if (ap_info[i].ssid[0] == '\0') continue;
                     
-                    // Skip whitelisted networks.
+                    // Skip whitelisted networks
                     if (isWhitelisted((char*)ap_info[i].ssid)) continue;
                     
                     strncpy(apList[apCount].ssid, (char*)ap_info[i].ssid, sizeof(apList[apCount].ssid) - 1);
