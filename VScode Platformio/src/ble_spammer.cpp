@@ -35,7 +35,7 @@ static bool needsRedraw = true;
 static unsigned long lastActiveUpdate = 0;
 const unsigned long activeUpdateInterval = 1000;
 
-// BLE advertising parameters (connectable but we reject connections in the esp_ble_gap_register_callback)
+// BLE advertising parameters (connectable, but connections are rejected in esp_ble_gap_register_callback).
 static esp_ble_adv_params_t adv_params = {
     .adv_int_min = 0x20,
     .adv_int_max = 0x40,
@@ -45,7 +45,7 @@ static esp_ble_adv_params_t adv_params = {
     .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY
 };
     
-// NyanBOX Custom Names
+// NyanBOX custom names.
 static const char* customNames[] = {
     "zr_crackin was here",
     "jbohack was here",
@@ -199,28 +199,28 @@ static void drawActiveSpam(const char* modeName, const char* extraInfo = nullptr
   displayMirrorSend(u8g2);
 }
     
-// Packet structure for each advertisement
+// Packet structure for each advertisement.
 typedef uint8_t* PacketPtr;
 static void make_packet(const char* name, uint8_t* size, PacketPtr* packet) {
     uint8_t name_len = strlen(name);
     uint8_t total = 12 + name_len;
     *packet = (uint8_t*)malloc(total);
     uint8_t i = 0;
-    // Flags
+    // Flags.
     (*packet)[i++] = 2;
     (*packet)[i++] = 0x01;
     (*packet)[i++] = 0x06;
-    // Complete Local Name
+    // Complete local name.
     (*packet)[i++] = name_len + 1;
     (*packet)[i++] = 0x09;
     memcpy(&(*packet)[i], name, name_len);
     i += name_len;
-    // Service UUID List (HID)
+    // Service UUID list (HID).
     (*packet)[i++] = 3;
     (*packet)[i++] = 0x02;
     (*packet)[i++] = 0x12;
     (*packet)[i++] = 0x18;
-    // Tx Power Level
+    // TX power level.
     (*packet)[i++] = 2;
     (*packet)[i++] = 0x0A;
     (*packet)[i++] = 0x00;
@@ -283,7 +283,7 @@ void bleSpamSetup() {
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_P9);
 
-    // CB registration to handle incoming connections (we just ignore them)
+    // Callback registration to handle incoming connections (they are ignored).
     esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){});
 
     bleInitialized = true;

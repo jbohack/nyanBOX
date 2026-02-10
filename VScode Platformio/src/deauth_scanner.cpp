@@ -54,7 +54,7 @@ static bool lastMacSeen = false;
 static unsigned long lastPeriodicUpdate = 0;
 const unsigned long periodicUpdateInterval = 1000;
 
-// Bypass sanity checks for raw 802.11 frames
+// Bypass sanity checks for raw 802.11 frames.
 extern "C" int ieee80211_raw_frame_sanity_check(int32_t, int32_t, int32_t) {
     return 0;
 }
@@ -86,7 +86,7 @@ void packetSniffer(void *buf, wifi_promiscuous_pkt_type_t type) {
     wifi_ieee80211_mac_hdr_t *hdr = (wifi_ieee80211_mac_hdr_t *)packet->payload;
     uint16_t fc = hdr->frame_ctrl;
 
-    if ((fc & 0xFC) == 0xC0) {  // Deauth frame filter
+    if ((fc & 0xFC) == 0xC0) {  // Deauthentication frame filter.
         memcpy(lastDeauthMAC, hdr->addr2, 6);
         lastDeauthChannel = currentChannel;
         macSeen = true;

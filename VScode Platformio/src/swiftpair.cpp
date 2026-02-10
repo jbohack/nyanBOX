@@ -35,7 +35,7 @@ static bool needsRedraw = true;
 static unsigned long lastActiveUpdate = 0;
 const unsigned long activeUpdateInterval = 1000;
 
-// BLE advertising parameters (connectable but we reject connections)
+// BLE advertising parameters (connectable, but connections are rejected).
 static esp_ble_adv_params_t adv_params = {
     .adv_int_min = 0x20,
     .adv_int_max = 0x40,
@@ -282,7 +282,7 @@ void swiftpairSpamSetup() {
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
     esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_SCAN, ESP_PWR_LVL_P9);
 
-    // CB registration to handle incoming connections (we just ignore them)
+    // Callback registration to handle incoming connections (they are ignored).
     esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){});
 
     bleInitialized = true;

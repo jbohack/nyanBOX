@@ -19,7 +19,7 @@
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 extern Adafruit_NeoPixel pixels;
 
-// Radio pins
+// Radio pins.
 #define CE  RADIO_CE_PIN_1
 #define CSN RADIO_CSN_PIN_1
 
@@ -81,7 +81,7 @@ void scanChannels(void) {
 
   memset(channel, 0, sizeof(channel));
 
-  const int samplesPerChannel = 50; // Number of samples per channel to average
+  const int samplesPerChannel = 50; // Number of samples per channel to average.
 
   for (int i = 0; i < CHANNELS; i++) {
     setRegister(_NRF24_RF_CH, (128 * i) / CHANNELS);
@@ -90,18 +90,18 @@ void scanChannels(void) {
       setRX();
       delayMicroseconds(100); 
       disable();
-      channel[i] += getRegister(_NRF24_RPD); // Add the RPD value (1 or 0)
+      channel[i] += getRegister(_NRF24_RPD); // Add the RPD value (1 or 0).
     }
 
-    // Average the accumulated values for this channel
-    channel[i] = (channel[i] * 100) / samplesPerChannel; // Convert to percentage
+    // Average the accumulated values for this channel.
+    channel[i] = (channel[i] * 100) / samplesPerChannel; // Convert to a percentage.
   }
 }
 
 void outputChannels(void) {
   int norm = 0;
 
-  // Find the maximum value in the channel array for normalization
+  // Find the maximum value in the channel array for normalization.
   for (int i = 0; i < CHANNELS; i++) {
     if (channel[i] > norm) {
       norm = channel[i];
@@ -110,7 +110,7 @@ void outputChannels(void) {
 
   byte drawHeight = map(norm, 0, 64, 0, 64); 
   
-  // Update sensorArray with the new value (shift left for right-to-left movement)
+  // Update sensorArray with the new value (shift left for right-to-left movement).
   for (byte count = 126; count > 0; count--) {
     sensorArray[count] = sensorArray[count - 1];
   }
@@ -122,8 +122,8 @@ void outputChannels(void) {
   u8g2.drawLine(127, 0, 127, 63);
 
   for (byte count = 0; count < 64; count += 10) {
-    u8g2.drawLine(127, count, 122, count); // Right side markers
-    u8g2.drawLine(0, count, 5, count);    // Left side markers
+    u8g2.drawLine(127, count, 122, count); // Right-side markers.
+    u8g2.drawLine(0, count, 5, count);    // Left-side markers.
   }
 
   for (byte count = 10; count < 127; count += 10) {
@@ -131,7 +131,7 @@ void outputChannels(void) {
     u8g2.drawPixel(count, 63);
   }
 
-  // Draw the graph moving right-to-left
+  // Draw the graph moving right to left.
   for (byte count = 0; count < 127; count++) {
     u8g2.drawLine(127 - count, 63, 127 - count, 63 - sensorArray[count]);
   }

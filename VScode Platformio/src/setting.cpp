@@ -384,7 +384,7 @@ void maskMAC(const char* original, char* masked) {
     return;
   }
 
-  // Exclude generic placeholder MAC from masking
+  // Exclude generic placeholder MAC addresses from masking.
   if (strcmp(original, "N/A") == 0) {
     strcpy(masked, original);
     return;
@@ -405,7 +405,7 @@ void maskName(const char* original, char* masked, int maxLen) {
     return;
   }
 
-  // Exclude generic placeholder names from masking
+  // Exclude generic placeholder names from masking.
   if (strcmp(original, "Unknown") == 0 ||
       strcmp(original, "Hidden") == 0 ||
       strcmp(original, "N/A") == 0 ||
@@ -446,7 +446,7 @@ void maskNameEvilPortal(const char* original, char* masked, int maxLen, const ch
     return;
   }
 
-  // Exclude custom SSIDs from masking in Evil Portal
+  // Exclude custom SSIDs from masking in Evil Portal.
   for (int i = 0; i < customSSIDCount; i++) {
     if (strcmp(original, customSSIDs[i]) == 0) {
       strncpy(masked, original, maxLen);
