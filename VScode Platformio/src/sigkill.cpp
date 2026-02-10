@@ -37,7 +37,7 @@ static int lastMenuSelection = -1;
 static SigKillMode lastMode = SIG_MENU;
 static ProtocolType lastProtocol = ALL;
 
-// Protocol channel definitions
+// Protocol channel definitions.
 const byte bluetooth_channels[]        = {32,34,46,48,50,52,0,1,2,4,6,8,22,24,26,28,30,74,76,78,80};
 const byte ble_channels[]              = {2,26,80};
 const byte wifi_channels[]             = {1,2,3,4,5,6,7,8,9,10,11,12};

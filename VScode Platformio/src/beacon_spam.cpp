@@ -19,7 +19,7 @@
 
 extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 
-// Disable frame sanity checks
+// Disable frame sanity checks.
 extern "C" int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3) {
     return 0;
 }

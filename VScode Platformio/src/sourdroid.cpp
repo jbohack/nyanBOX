@@ -914,7 +914,7 @@ void sourDroidLoop() {
         }
 
         case SOURDROID_ALL: {
-            static uint8_t currentType = 0; // 0=FastPair, 1=Buds, 2=Watch
+            static uint8_t currentType = 0; // 0 = FastPair, 1 = Buds, 2 = Watch.
             static uint16_t fastpairIdx = 0;
             static uint16_t budsIdx = 0;
             static uint16_t watchIdx = 0;

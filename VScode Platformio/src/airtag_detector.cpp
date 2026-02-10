@@ -73,7 +73,7 @@ static void bda_to_string(uint8_t *bda, char *str, size_t size) {
 bool isAirTagPayload(uint8_t *payload, uint8_t payload_len) {
     if (!payload || payload_len < 4) return false;
 
-    // Check common AirTag patterns - "1E FF 4C 00" and "4C 00 12 19" 
+    // Check common AirTag patterns: "1E FF 4C 00" and "4C 00 12 19".
     for (int i = 0; i <= payload_len - 4; i++) {
         if (payload[i] == 0x1E && payload[i+1] == 0xFF && 
             payload[i+2] == 0x4C && payload[i+3] == 0x00) {
