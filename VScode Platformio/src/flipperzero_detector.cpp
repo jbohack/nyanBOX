@@ -82,7 +82,7 @@ static void bda_to_string(uint8_t *bda, char *str, size_t size) {
 
 const char* getFlipperColorFromUUID(uint8_t *adv_data, uint8_t adv_data_len) {
     // Flipper Zero uses 16-bit service UUIDs:
-    // Black: 0x3081, white: 0x3082, transparent: 0x3083.
+    // Black: 0x3081, white: 0x3082, transparent: 0x3083
     
     uint8_t uuid_len = 0;
     uint8_t *uuid_data = esp_ble_resolve_adv_data(adv_data, ESP_BLE_AD_TYPE_16SRV_CMPL, &uuid_len);
