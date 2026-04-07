@@ -93,62 +93,68 @@ const char ssids[] PROGMEM = {
   "Lan Of The Lost\n"
 };
 
-char emptySSID[32];
 uint8_t macAddr[6];
 uint8_t wifi_channel = 1;
 uint32_t currentTime = 0;
 
-uint8_t beaconPacketOpen[83] = {
-  0x80, 0x00, 0x00, 0x00,
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-  0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-  0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-  0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x64, 0x00,
-  0x01, 0x04,
-  0x00, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x0c, 0x18, 0x30, 0x48,
-  0x03, 0x01, 0x01
-};
-
-uint8_t beaconPacketWPA2[109] = {
-  0x80, 0x00, 0x00, 0x00,
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-  0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-  0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-  0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x64, 0x00,
-  0x11, 0x04,
-  0x00, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x0c, 0x18, 0x30, 0x48,
-  0x03, 0x01, 0x01,
-  0x30, 0x18, 0x01, 0x00, 0x00, 0x0f, 0xac, 0x02,
-  0x02, 0x00, 0x00, 0x0f, 0xac, 0x04, 0x00, 0x0f,
-  0xac, 0x02, 0x01, 0x00, 0x00, 0x0f, 0xac, 0x02,
-  0x00, 0x00
-};
-
 void randomMac() {
-  for (int i = 0; i < 6; i++) {
-    macAddr[i] = random(256);
-  }
+  for (int i = 0; i < 6; i++) macAddr[i] = random(256);
   macAddr[0] |= 0x02;
   macAddr[0] &= 0xFE;
 }
 
-uint16_t randomBeaconInterval() {
-  uint16_t intervals[] = {0x64, 0x32, 0xC8, 0x12C};
-  return intervals[random(4)] | (intervals[random(4)] << 8);
+// Build beacon frame dynamically so IE tags are at the correct offsets
+// regardless of SSID length. The old static templates had tags at fixed
+// positions which broke when the SSID was shorter than 32 bytes.
+void sendBeaconFrame(const char *ssid, uint8_t ssidLen, uint8_t channel, bool wpa2) {
+  uint8_t frame[128];
+  memset(frame, 0, sizeof(frame));
+  int p = 0;
+
+  frame[p++] = 0x80; frame[p++] = 0x00;
+  frame[p++] = 0x00; frame[p++] = 0x00;
+  memset(&frame[p], 0xFF, 6); p += 6;
+  randomMac();
+  memcpy(&frame[p], macAddr, 6); p += 6;
+  memcpy(&frame[p], macAddr, 6); p += 6;
+  uint16_t seq = random(4096) << 4;
+  frame[p++] = seq & 0xFF;
+  frame[p++] = (seq >> 8) & 0xFF;
+
+  uint64_t ts = (uint64_t)esp_timer_get_time();
+  memcpy(&frame[p], &ts, 8); p += 8;
+  frame[p++] = 0x64; frame[p++] = 0x00;
+  frame[p++] = wpa2 ? 0x11 : 0x01;
+  frame[p++] = 0x04;
+
+  // SSID
+  frame[p++] = 0x00;
+  frame[p++] = ssidLen;
+  memcpy(&frame[p], ssid, ssidLen); p += ssidLen;
+
+  // Supported Rates
+  frame[p++] = 0x01; frame[p++] = 0x08;
+  frame[p++] = 0x82; frame[p++] = 0x84;
+  frame[p++] = 0x8b; frame[p++] = 0x96;
+  frame[p++] = 0x0c; frame[p++] = 0x18;
+  frame[p++] = 0x30; frame[p++] = 0x48;
+
+  // DS Parameter Set
+  frame[p++] = 0x03; frame[p++] = 0x01; frame[p++] = channel;
+
+  // RSN (WPA2)
+  if (wpa2) {
+    const uint8_t rsn[] = {
+      0x30, 0x18, 0x01, 0x00, 0x00, 0x0f, 0xac, 0x02,
+      0x02, 0x00, 0x00, 0x0f, 0xac, 0x04, 0x00, 0x0f,
+      0xac, 0x02, 0x01, 0x00, 0x00, 0x0f, 0xac, 0x02,
+      0x00, 0x00
+    };
+    memcpy(&frame[p], rsn, sizeof(rsn)); p += sizeof(rsn);
+  }
+
+  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+  esp_wifi_80211_tx(WIFI_IF_AP, frame, p, false);
 }
 
 void nextChannel() {
@@ -349,7 +355,7 @@ void updateSSIDScan() {
     if (now - beacon_scanStartTime > SCAN_DURATION) {
         processScanResults(now);
         esp_wifi_scan_stop();
-        esp_wifi_set_promiscuous(true);
+        esp_wifi_set_mode(WIFI_MODE_AP);
 
         beacon_isScanning = false;
         beacon_lastScanTime = now;
@@ -365,15 +371,13 @@ void updateSSIDScan() {
 }
 
 void beaconSpamSetup() {
-  for (int i = 0; i < 32; i++) emptySSID[i] = ' ';
   randomSeed((uint32_t)esp_random());
 
   beacon_isScanning = false;
   beacon_lastApCount = 0;
 
-  initWiFi(WIFI_MODE_STA);
+  initWiFi(WIFI_MODE_AP);
 
-  esp_wifi_set_promiscuous(true);
   esp_wifi_set_channel(channels[0], WIFI_SECOND_CHAN_NONE);
 
   pinMode(BTN_UP, INPUT_PULLUP);
@@ -488,32 +492,7 @@ void beaconSpamLoop() {
       }
 
       for (const auto& entry : scannedSSIDs) {
-        bool useWPA2 = (random(10) < 4);
-        uint8_t *packet = useWPA2 ? beaconPacketWPA2 : beaconPacketOpen;
-        size_t packetSize = useWPA2 ? sizeof(beaconPacketWPA2) : sizeof(beaconPacketOpen);
-        
-        randomMac();
-        memcpy(&packet[10], macAddr, 6);
-        memcpy(&packet[16], macAddr, 6);
-        
-        uint16_t seqNum = random(4096) << 4;
-        packet[22] = seqNum & 0xFF;
-        packet[23] = (seqNum >> 8) & 0xFF;
-        
-        memset(&packet[38], ' ', 32);
-        size_t len = strlen(entry.ssid);
-        memcpy(&packet[38], entry.ssid, len);
-        packet[37] = len;
-        
-        uint16_t beaconInt = randomBeaconInterval();
-        packet[32] = beaconInt & 0xFF;
-        packet[33] = (beaconInt >> 8) & 0xFF;
-        
-        packet[82] = entry.channel;
-        uint64_t timestamp = (uint64_t)esp_timer_get_time();
-        memcpy(&packet[24], &timestamp, 8);
-        esp_wifi_set_channel(entry.channel, WIFI_SECOND_CHAN_NONE);
-        esp_wifi_80211_tx(WIFI_IF_STA, packet, packetSize, false);
+        sendBeaconFrame(entry.ssid, strlen(entry.ssid), entry.channel, random(10) < 4);
         delayMicroseconds(100);
       }
       if (left) {
@@ -568,32 +547,7 @@ void beaconSpamLoop() {
           if (currentTime - lastBeacon > beaconInterval) {
             for (const auto& entry : scannedSSIDs) {
               if (entry.selected) {
-                bool useWPA2 = (random(10) < 4);
-                uint8_t *packet = useWPA2 ? beaconPacketWPA2 : beaconPacketOpen;
-                size_t packetSize = useWPA2 ? sizeof(beaconPacketWPA2) : sizeof(beaconPacketOpen);
-                
-                randomMac();
-                memcpy(&packet[10], macAddr, 6);
-                memcpy(&packet[16], macAddr, 6);
-                
-                uint16_t seqNum = random(4096) << 4;
-                packet[22] = seqNum & 0xFF;
-                packet[23] = (seqNum >> 8) & 0xFF;
-                
-                memset(&packet[38], ' ', 32);
-                size_t len = strlen(entry.ssid);
-                memcpy(&packet[38], entry.ssid, len);
-                packet[37] = len;
-                
-                uint16_t beaconInt = randomBeaconInterval();
-                packet[32] = beaconInt & 0xFF;
-                packet[33] = (beaconInt >> 8) & 0xFF;
-                
-                packet[82] = entry.channel;
-                uint64_t timestamp = (uint64_t)esp_timer_get_time();
-                memcpy(&packet[24], &timestamp, 8);
-                esp_wifi_set_channel(entry.channel, WIFI_SECOND_CHAN_NONE);
-                esp_wifi_80211_tx(WIFI_IF_STA, packet, packetSize, false);
+                sendBeaconFrame(entry.ssid, strlen(entry.ssid), entry.channel, random(10) < 4);
                 delayMicroseconds(100);
               }
             }
@@ -664,33 +618,14 @@ void beaconSpamLoop() {
             } while (tmp != '\n' && j <= 32 && (ssidStart + j) < (int)strlen_P(ssids));
             
             uint8_t ssidLen = j - 1;
-            
-            bool useWPA2 = (random(10) < 4);
-            uint8_t *packet = useWPA2 ? beaconPacketWPA2 : beaconPacketOpen;
-            size_t packetSize = useWPA2 ? sizeof(beaconPacketWPA2) : sizeof(beaconPacketOpen);
-            
-            randomMac();
-            memcpy(&packet[10], macAddr, 6);
-            memcpy(&packet[16], macAddr, 6);
-            
-            uint16_t seqNum = random(4096) << 4;
-            packet[22] = seqNum & 0xFF;
-            packet[23] = (seqNum >> 8) & 0xFF;
-            
-            memcpy(&packet[38], emptySSID, 32);
-            for (int k = 0; k < ssidLen; k++) {
-              packet[38 + k] = pgm_read_byte(ssids + ssidStart + k);
+
+            char ssidBuf[33];
+            for (int k = 0; k < ssidLen && k < 32; k++) {
+              ssidBuf[k] = pgm_read_byte(ssids + ssidStart + k);
             }
-            packet[37] = ssidLen;
-            
-            uint16_t beaconInt = randomBeaconInterval();
-            packet[32] = beaconInt & 0xFF;
-            packet[33] = (beaconInt >> 8) & 0xFF;
-            
-            packet[82] = wifi_channel;
-            uint64_t timestamp = (uint64_t)esp_timer_get_time();
-            memcpy(&packet[24], &timestamp, 8);
-            esp_wifi_80211_tx(WIFI_IF_STA, packet, packetSize, false);
+            ssidBuf[ssidLen] = '\0';
+
+            sendBeaconFrame(ssidBuf, ssidLen, wifi_channel, random(10) < 4);
           }
           batchBeacon++;
         }
@@ -737,33 +672,8 @@ void beaconSpamLoop() {
               randomSSID[i] = chars[random(strlen(chars))];
             }
             randomSSID[length] = '\0';
-            
-            bool useWPA2 = (random(10) < 4);
-            uint8_t *packet = useWPA2 ? beaconPacketWPA2 : beaconPacketOpen;
-            size_t packetSize = useWPA2 ? sizeof(beaconPacketWPA2) : sizeof(beaconPacketOpen);
-            
-            randomMac();
-            memcpy(&packet[10], macAddr, 6);
-            memcpy(&packet[16], macAddr, 6);
-            
-            uint16_t seqNum = random(4096) << 4;
-            packet[22] = seqNum & 0xFF;
-            packet[23] = (seqNum >> 8) & 0xFF;
-            
-            memset(&packet[38], ' ', 32);
-            uint8_t len = length;
-            if (len > 32) len = 32;
-            memcpy(&packet[38], randomSSID, len);
-            packet[37] = len;
-            
-            uint16_t beaconInt = randomBeaconInterval();
-            packet[32] = beaconInt & 0xFF;
-            packet[33] = (beaconInt >> 8) & 0xFF;
-            
-            packet[82] = wifi_channel;
-            uint64_t timestamp = (uint64_t)esp_timer_get_time();
-            memcpy(&packet[24], &timestamp, 8);
-            esp_wifi_80211_tx(WIFI_IF_STA, packet, packetSize, false);
+
+            sendBeaconFrame(randomSSID, length, wifi_channel, random(10) < 4);
           }
           
           if (++randomBatchesSinceSwitch >= 4) {
