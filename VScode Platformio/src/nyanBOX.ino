@@ -69,6 +69,7 @@
 #include "../include/display_mirror.h"
 #include "../include/password.h"
 #include "../include/radio_manager.h"
+#include "../include/packet_logger.h"
 
 RF24 radios[] = {
   RF24(RADIO_CE_PIN_1, RADIO_CSN_PIN_1),
@@ -409,6 +410,7 @@ MenuItem otherMenu[] = {
   { "Device Scout", nullptr, deviceScoutSetup, deviceScoutLoop, cleanupDeviceScout },
   { "Scanner",      nullptr, scannerSetup,    scannerLoop,    cleanupRadio },
   { "Analyzer",     nullptr, analyzerSetup,   analyzerLoop,   cleanupRadio },
+  { "Packet Logger", nullptr, packetLoggerSetup, packetLoggerLoop, cleanupWiFi },
   { "Setting",      nullptr, settingSetup,    settingLoop,    noCleanup },
   { "About",        nullptr, aboutSetup,      aboutLoop,      aboutCleanup },
   { "Back",         nullptr, nullptr,         nullptr,        noCleanup }
