@@ -84,6 +84,7 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 - **AirTag Detector** – Scans for and identifies nearby Apple AirTag devices.
 - **AirTag Spoofer** – Clones and rebroadcasts detected Apple AirTag devices for selective or bulk spoofing.
 - **FindMy Beeper** – Scans for nearby Apple FindMy devices like AirTags, AirPods, and other FindMy accessories and triggers their built-in speaker. Choose Beep Selected to target a specific device or Beep All to sweep every FindMy device in range automatically.
+- **HID Beeper** – Scans for HID access control readers advertising over Bluetooth, the BLE radios added to modern readers for remote management, and lists nearby units with signal strength. Choose Beep Selected to trigger the beeper on a specific reader, or DoS Selected to hold a reader so that no card will badge in while it is active.
 - **SmartTag Detector** - Scans for and identifies nearby Samsung SmartTag devices.
 - **Tile Detector** - Scans for and identifies nearby Tile Tracker devices.
 - **KARR Detector** - Scans for nearby KARR and SWDS anti-theft systems, the RF anti-theft devices affected by a shared-key vulnerability that lets an attacker unlock, honk, flash lights, or shut off ignition on vulnerable vehicles. Displays device presence and signal strength, with a check mode to confirm whether a given unit is patched or still vulnerable, and a locate mode to pinpoint the unit's position.
