@@ -56,50 +56,49 @@ Built around an ESP32 with triple NRF24 modules, a crisp OLED display, and a 250
 
 ## 🎯 What Can It Do?
 
-> **⚠️ Note:** Additional advanced tools can be enabled in the Settings menu.
-
 ### 📶 WiFi Tools
-- **WiFi Scanner** – Detects nearby WiFi access points with full client detection. View connected clients for each network, monitor their signal strength, packet activity, and deauthenticate individual clients.
+- **WiFi Scanner** – Detects nearby WiFi access points with full client detection. View connected clients per network, monitor signal strength and packet activity, and send targeted deauthentication to clients you're authorized to test to study reconnection behavior.
 - **Channel Analyzer** – Visualizes WiFi congestion across all channels with a real-time bar chart to identify the best channel for your network
 - **Camera Detector** – Passively scans nearby WiFi traffic to detect and identify wireless security cameras. Fingerprints devices by MAC OUI and frame heuristics to identify Ring, Blink, Nest, Arlo, Wyze, Reolink, Eufy, Hikvision, Dahua, Axis, and 20+ more camera brands without transmitting a single packet. Displays the camera's MAC address, SSID, signal strength, and confidence level. Lock onto a detected camera and use the signal strength meter to physically locate it.
-- **Camera Deauther** – Detects and deauthenticates wireless security cameras by OUI fingerprinting and frame heuristics. Targets Ring, Blink, Nest, Arlo, Wyze, Reolink, Eufy, Hikvision, Dahua, Axis, and 20+ more. Lock onto a detected camera and forcibly disconnect it from its network.
+- **Camera Deauther** – Identifies wireless security cameras by OUI fingerprinting and frame heuristics (Ring, Blink, Nest, Arlo, Wyze, Reolink, Eufy, Hikvision, Dahua, Axis, and 20+ more). Lock onto a camera you own or are authorized to test to evaluate how well it detects, alerts on, and recovers from deauthentication, so you can verify your setup fails safely.
 - **WiFi Deauther** – Educational tool for testing network security with deauthentication frames on authorized networks
-- **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time. Displays the source MAC, channel, and live RSSI of the deauthing transmitter. Use it to physically locate the source of a deauth attack.
+- **Deauth Scanner** – Monitors and analyzes WiFi deauthentication frames in real-time. Displays the source MAC, channel, and live RSSI of the deauthing transmitter. Use it to physically locate the source of deauthentication activity.
 - **Packet Monitor** – Passive 802.11 packet capture in promiscuous mode with channel hopping, live packet counters by type, and CSV export over Serial.
-- **Beacon Spam** – Broadcasts multiple fake WiFi networks for testing. Choose to clone real nearby networks, select specific SSIDs, or use a list of random names.
-- **Evil Portal** – Creates a captive portal with multiple realistic templates (Google, Facebook, Apple ID, Microsoft, and Xfinity) that automatically scans nearby networks for realistic SSID spoofing and credential capture.
+- **Beacon Spam** – Broadcasts multiple decoy SSIDs (clone, custom, or random) to test how clients handle network discovery in congested RF environments.
+- **Evil Portal** – Creates a captive portal with multiple realistic templates (Google, Facebook, Apple ID, Microsoft, and Xfinity) for authorized security-awareness testing. Auto-scans nearby networks for SSID matching to demonstrate how phishing portals work and help teams learn to recognize them.
 - **Pineapple Detector** – Detect and identify nearby Pineapple devices
 - **Pwnagotchi Detector** – Detects nearby Pwnagotchi devices and displays their information
-- **Pwnagotchi Spam** - Pwnagotchi grid flooding tool that generates fake beacon frames with randomized identities, faces, names, and versions (contains optional DoS mode).
+- **Pwnagotchi Spam** - Broadcasts decoy Pwnagotchi beacon frames with randomized identities to test detection and handling.
 
 ### 🔵 Bluetooth (BLE) Tools
+- **Real-time Device Locator** – All BLE-based detectors include a locate mode with signal strength visualization for precise device tracking
 - **BLE Scanner** – Detects nearby BLE devices
 - **BLE Inspector** – Decodes raw BLE advertising packets from nearby devices, displaying service UUIDs, manufacturer data, TX power, flags, and raw payloads.
-- **nyanBOX Detector** – Discovers nearby nyanBOX devices and displays their information including level, version, and signal strength.
+- **nyanBOX Detector** – Discovers nearby nyanBOX devices with level, version, and signal strength.
 - **Flipper Scanner** – Detects nearby Flipper Zero devices
 - **Axon Detector** – Detects nearby Axon devices (body cameras, tasers, and other law enforcement equipment)
 - **Meshtastic Detector** - Detects nearby devices running Meshtastic firmware
 - **MeshCore Detector** - Detects nearby devices running MeshCore firmware
 - **Skimmer Detector** – Detects HC-03, HC-05, and HC-06 Bluetooth modules commonly used in credit card skimming devices.
 - **AirTag Detector** – Scans for and identifies nearby Apple AirTag devices.
-- **AirTag Spoofer** – Clones and rebroadcasts detected Apple AirTag devices for selective or bulk spoofing.
-- **FindMy Beeper** – Scans for nearby Apple FindMy devices like AirTags, AirPods, and other FindMy accessories and triggers their built-in speaker. Choose Beep Selected to target a specific device or Beep All to sweep every FindMy device in range automatically.
-- **HID Beeper** – Scans for HID access control readers advertising over Bluetooth, the BLE radios added to modern readers for remote management, and lists nearby units with signal strength. Choose Beep Selected to trigger the beeper on a specific reader, or DoS Selected to hold a reader so that no card will badge in while it is active.
+- **AirTag Spoofer** – Clones and rebroadcasts AirTag advertisements, selectively or in bulk, to test FindMy protocol behavior and the accuracy of tracker-detection systems.
+- **FindMy Beeper** – Scans for Apple FindMy devices like AirTags, AirPods, and other FindMy accessories and triggers their built-in speaker, useful for locating your own items or surfacing unknown trackers during a sweep. Use Beep Selected to target a specific device or Beep All to sweep every FindMy device in range.
+- **HID Beeper** – Scans for HID access-control readers advertising over Bluetooth (the BLE radios added to modern readers for remote management), and lists in-range units with signal strength. Beep Selected triggers a reader's beeper to confirm identification; Availability Test exercises a reader's BLE interface under load to study its resilience during authorized security testing.
 - **SmartTag Detector** - Scans for and identifies nearby Samsung SmartTag devices.
 - **Tile Detector** - Scans for and identifies nearby Tile Tracker devices.
-- **KARR Detector** - Scans for nearby KARR and SWDS anti-theft systems, the RF anti-theft devices affected by a shared-key vulnerability that lets an attacker unlock, honk, flash lights, or shut off ignition on vulnerable vehicles. Displays device presence and signal strength, with a check mode to confirm whether a given unit is patched or still vulnerable, and a locate mode to pinpoint the unit's position.
+- **KARR Detector** - Scans for nearby KARR and SWDS RF anti-theft systems, a device class affected by a publicly documented shared-key vulnerability. Displays device presence and signal strength, with a check mode to confirm whether a unit is patched or still vulnerable and a locate mode to pinpoint it.
 - **RayBan Detector** - Scans for and identifies nearby RayBan Meta smart glasses.
 - **iBeacon Detector** – Scans for and decodes Apple iBeacon BLE advertisements in real time. iBeacons are deployed in stores, airports, malls, and stadiums to track your movement and behavior.
-- **iBeacon Spoofer** - Detects, clones, and rebroadcasts nearby Apple iBeacon advertisements. Clone individual beacons or all detected beacons simultaneously. By introducing duplicate beacon identifiers into the environment, iBeacon Spoofer can throw off beacon-based positioning systems and reduce the accuracy of indoor location tracking, movement analytics, and location-aware profiling used by retailers, venues, and third-party applications.
+- **iBeacon Spoofer** - Detects, clones, and rebroadcasts iBeacon advertisements, individually or all at once. Inject duplicate beacon IDs into a test environment to assess the integrity of beacon-based positioning, indoor tracking, and location analytics.
 - **BLE Spammer** – Broadcasts BLE advertisement packets for testing
-- **Swift Pair** - Triggers Windows Swift Pair notifications by broadcasting fake Microsoft device advertisements.
-- **Sour Apple** – Mimics Apple Bluetooth signals like AirPods pairing pop-up to test device resilience against protocol exploits.
-- **Sour Droid** – Floods nearby Android and Samsung devices with Google FastPair and Samsung EasySetup pairing notifications by cycling through hundreds of device models to test protocol resilience.
-- **BLE Spoofer** – Clones and rebroadcasts detected BLE devices with complete 1:1 replication of MAC address, name, advertising data, scan response, and connectable state.
+- **Swift Pair** - Broadcasts Microsoft Swift Pair advertisements to test how Windows handles pairing notifications.
+- **Sour Apple** – Mimics Apple Bluetooth signals like AirPods pairing pop-ups to test iOS proximity-pairing behavior.
+- **Sour Droid** – Broadcasts Google FastPair and Samsung EasySetup pairing advertisements across hundreds of device models to test how Android and Samsung devices handle pairing-notification traffic.
+- **BLE Spoofer** – Clones and rebroadcasts BLE advertisements with full 1:1 replication of MAC address, name, advertising data, scan response, and connectable state to test device-identification and pairing logic.
 
 ### 📡 Signal & Protocol Tools
 - **Drone Detector** – Detects nearby drones broadcasting RemoteID via WiFi and BLE. Displays drone identification, GPS location, altitude, speed, operator information, and flight status. Features a locate mode with real-time RSSI signal strength meter to help pinpoint drone positions.
-- **Drone Spoofer** – Broadcasts fake Open Drone ID (ODID) Remote ID packets over BLE and WiFi per the ASTM F3411 spec. Generates randomized drone identities, GPS coordinates, altitudes, speeds, and operator IDs.
+- **Drone Spoofer** – Generates Open Drone ID (ODID) Remote ID packets over BLE and WiFi per the ASTM F3411 spec, with randomized drone identities, coordinates, altitudes, speeds, and operator IDs, built for developing and bench-testing Remote ID detection apps.
 - **Flock Detector** - Detects Flock Safety surveillance cameras using dual-mode WiFi and BLE scanning. Identifies devices through SSID patterns, MAC OUI prefixes, and Bluetooth device names. Uses promiscuous frame capture to detect cameras even when powered on and not actively broadcasting. Features real-time signal strength tracking with detailed device info and a locate mode for pinpointing camera positions.
 - **LE Gear Detector** - Passively scans WiFi and BLE traffic to detect law enforcement equipment. Identifies body cams, radios, radar, lightbars, and other gear from Axon, Motorola, Hytera, and 40+ more vendors. Displays device category, confidence level, and signal strength, with a locate mode to pinpoint devices.
 - **Device Scout** – Wireless device scanner combining Bluetooth and WiFi detection with anti-surveillance capabilities. Discovers nearby devices and ranks by persistence to identify trackers following you.
@@ -112,14 +111,19 @@ nyanBOX features a built-in RPG-style leveling system that tracks your usage thr
 
 - **Level Progression** – Gain XP by using different tools and features
 - **Rank System** – Progress through 9 different ranks
-- **Usage Tracking** – Different XP rates for scanning, attacks, and utilities/misc
+- **Usage Tracking** – Different XP rates for scanning, testing, and utilities
 - **Session Bonuses** – Extra XP for extended tool usage
-- **Level Display** – Current level shown on main menu, detailed stats accessible via RIGHT arrow
-- **Progress Persistence** – Level data saved to EEPROM, survives power cycles
-- **XP Reset** – Reset progress via Settings menu if desired
-- **Device Networking** – Your level and version are automatically broadcasted to nearby nyanBOX devices for discovery
+- **Level Display** – Current level shown on main menu with stats
+- **Progress Persistence** – Level data saved to EEPROM
+- **Unique Device Names** – Every nyanBOX gets its own generated name for added personality
+- **Device Networking** – Broadcast and discover other users' progress
 
 Hit RIGHT in the main menu to check your stats. Level up by tinkering with RF signals and unlock ranks as you progress. Other nyanBOX users can see your progress when they scan for nearby devices!
+
+### 🔒 Device Security
+- **Device Lock** – Secure your nyanBOX with a custom arrow sequence password, keeping your device locked down when it's not in your hands.
+
+> **⚠️ Note:** Additional settings can be configured in the Settings menu.
 
 ---
 
@@ -172,6 +176,8 @@ Get up and running or update to the latest features:
 - You’re responsible for how you use it
 
 By using nyanBOX, you agree to use it ethically and legally. We're not liable for misuse.
+
+Read the full [legal disclaimer](https://nyandevices.com/legal/) and our [privacy policy](https://nyandevices.com/privacy/).
 
 ---
 
